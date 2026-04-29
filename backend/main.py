@@ -3,7 +3,7 @@ sys.path.append('/Users/mattia/clawd-test')
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from routers import chapters, versions, versions_fs
+from routers import chapters, versions, versions_fs, ai
 
 app = FastAPI()
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(chapters.router, prefix="/chapters", tags=["chapters"])
 app.include_router(versions.router, prefix="/versions", tags=["versions"])
 app.include_router(versions_fs.router, prefix="/versions_fs", tags=["versions_fs"])
+app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
 
 @app.post("/api/ai/revise")
 async def revise_text(payload: dict):
