@@ -1,0 +1,5 @@
+senti una cosa, ciò Open Cloudbot installato su un vecchio Mac Catalina che non riesce a fare
+trascrizione dei vocali. Sto pensando in perché non gli è sponito un servizio, su una porta
+interna, un'opendiamo quale, in modo che quello che giro su quell' Catalina può
+usar il tuo Whisper per trascrire i miei locali, basta che applauda il file, tagtono
+ad rascrire i miei locali.

@@ -1,0 +1,20 @@
+1
+00:00:00,000 --> 00:00:08,000
+senti una cosa, ciò Open Cloudbot installato su un vecchio Mac Catalina che non riesce a fare
+
+2
+00:00:08,000 --> 00:00:14,400
+trascrizione dei vocali. Sto pensando in perché non gli è sponito un servizio, su una porta
+
+3
+00:00:14,400 --> 00:00:20,120
+interna, un'opendiamo quale, in modo che quello che giro su quell' Catalina può
+
+4
+00:00:20,120 --> 00:00:26,000
+usar il tuo Whisper per trascrire i miei locali, basta che applauda il file, tagtono
+
+5
+00:00:26,000 --> 00:00:27,400
+ad rascrire i miei locali.
+
