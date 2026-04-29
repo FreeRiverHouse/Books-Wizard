@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
+router = APIRouter()
+
 # Mock implementation of provider functions
 def _get_providers():
     # Return a mock list of providers

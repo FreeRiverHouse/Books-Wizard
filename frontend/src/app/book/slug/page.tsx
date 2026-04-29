@@ -1,46 +1,77 @@
 // page.tsx
 import React, { useState } from 'react';
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form, Alert } from 'react-bootstrap';
 
 const ChapterGenerator = () => {
   const [showModal, setShowModal] = useState(false);
   const [chapterContent, setChapterContent] = useState('');
   const [chapterTitle, setChapterTitle] = useState('');
+  const [topic, setTopic] = useState('');
+  const [style, setStyle] = useState('narrative');
+  const [targetLength, setTargetLength] = useState(800);
+  const [language, setLanguage] = useState('en');
+  const [showPreview, setShowPreview] = useState(false);
+  const [error, setError] = useState('');
 
   const handleGenerateChapter = async (e) => {
     e.preventDefault();
-    // Implementation would go here
+    
+    // Call the API endpoint
+    try {
+      const response = await fetch('/api/ai/write-chapter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic,
+          style,
+          target_length: targetLength,
+          language
+        }),
+      });
+      
+      if (response.status === 503) {
+        setError('Configure NVIDIA_API_KEY or LOCAL_MODEL_URL in backend/.env');
+        return;
+      }
+      
+      const data = await response.json();
+      setChapterTitle(data.chapter_title);
+      setChapterContent(data.chapter_content);
+      setShowPreview(true);
+    } catch (err) {
+      console.error('Error generating chapter:', err);
+    }
+  };
+
+  const saveChapter = () => {
+    // Implementation to save chapter
+  };
+
+  const discardChapter = () => {
+    setShowPreview(false);
+    setShowModal(false);
   };
 
   return (
     <div>
-      <Button onClick={() => setShowModal(true)}>Genera Capitolo</Button>
+      <Button onClick={() => setShowModal(true)}>🪄 Generate Chapter</Button>
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Genera Capitolo</Modal.Title>
+          <Modal.Title>Generate Chapter</Modal.Title>
+        </Modal.Header>
+      </Modal>
+
+      <Modal show={showPreview} onHide={discardChapter}>
+        <Modal.Header closeButton>
+          <Modal.Title>Chapter Preview</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleGenerateChapter}>
-            <Form.Group>
-              <Form.Label>Topic</Form.Label>
-              <Form.Control type="text" placeholder="Argomento del capitolo" />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Stile</Form.Label>
-              <Form.Control as="select">
-                <option>narrativo</option>
-                <option>tecnico</option>
-                <option>poetico</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Lingua</Form.Label>
-              <Form.Control as="select">
-                <option>italiano</option>
-                <option>inglese</option>
-              </Form.Control>
-            </Form.Group>
-          </Form>
+          <h2>{chapterTitle}</h2>
+          <div>{chapterContent}</div>
+          <Button onClick={saveChapter}>Save as new chapter</Button>
+          <Button variant="secondary" onClick={discardChapter}>Discard</Button>
         </Modal.Body>
       </Modal>
     </div>
