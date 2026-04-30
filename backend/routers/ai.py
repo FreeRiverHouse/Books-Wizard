@@ -16,6 +16,39 @@ async def _call_ai(system_prompt: str, prompt: str, providers):
     # Mock implementation
     return f"Mock response for: {prompt}", "mock_model"
 
+class ReviseRequest(BaseModel):
+    text: str
+    style: str = "narrative"
+    target_length: int = 300
+    language: str = "en"
+    topic: str = ""
+
+@router.post("/api/ai/revise")
+async def ai_revise(req: ReviseRequest):
+    prompt = (
+        f"Rewrite this text in {req.style} style. "
+        f"Language: {req.language}. Target length: ~{req.target_length} words. "
+        f"Use [^N] footnote markers for technical/foreign terms. "
+        f"Return markdown starting with one '# Title' line.\n\n"
+        f"---\n\n{req.text}"
+    )
+    providers = _get_providers()
+    if not providers:
+        raise HTTPException(status_code=503, detail="No AI providers configured. Add API keys in Settings.")
+
+    system_prompt = (
+        "You are a professional editor. "
+        "Rewrite the provided text in the specified style. "
+        "Do not add any preamble, explanations, or comments outside the text."
+    )
+
+    result, model = await _call_ai(system_prompt, prompt, providers)
+
+    lines = result.split("\n", 1)
+    title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
+    content = lines[1] if len(lines) > 1 else result
+    return {"chapter_title": title, "chapter_content": content}
+
 class WriteChapterRequest(BaseModel):
     topic: str
     style: str = "narrative"

@@ -61,6 +61,54 @@ const ChapterGenerator = () => {
         <Modal.Header closeButton>
           <Modal.Title>Generate Chapter</Modal.Title>
         </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleGenerateChapter}>
+            <Form.Group>
+              <Form.Label>Topic</Form.Label>
+              <Form.Control 
+                as="textarea" 
+                rows={3}
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Style</Form.Label>
+              <Form.Control 
+                as="select"
+                value={style}
+                onChange={(e) => setStyle(e.target.value)}
+              >
+                <option value="narrative">Narrative</option>
+                <option value="technical">Technical</option>
+                <option value="poetic">Poetic</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Target Length</Form.Label>
+              <Form.Control 
+                type="number"
+                min="200"
+                max="3000"
+                value={targetLength}
+                onChange={(e) => setTargetLength(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Language</Form.Label>
+              <Form.Control 
+                type="text"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                placeholder="e.g., en, es, fr"
+              />
+            </Form.Group>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Button variant="primary" type="submit">
+              Generate Chapter
+            </Button>
+          </Form>
+        </Modal.Body>
       </Modal>
 
       <Modal show={showPreview} onHide={discardChapter}>
