@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+// Placeholder for the book page component
+export default function BookPage() {
+  return (
+    <div>
+      <h1>Book Page</h1>
+    </div>
+  );
+}
+=======
 // page.tsx
 import React, { useState } from 'react';
 import { Button, Modal, Form, Alert } from 'react-bootstrap';
@@ -127,3 +137,4 @@ const ChapterGenerator = () => {
 };
 
 export default ChapterGenerator;
+>>>>>>> 7663ac56e3e488fa833b5d26a207e0ee1402f6d7

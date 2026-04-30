@@ -1,6 +1,9 @@
+<<<<<<< HEAD
+=======
 I can help you create a Python script for the ai.py file based on the HEARTBEAT.md instructions. Here's the implementation:
 
 ```python
+>>>>>>> 7663ac56e3e488fa833b5d26a207e0ee1402f6d7
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -79,7 +82,11 @@ async def ai_write_chapter(req: WriteChapterRequest):
     lines = result.split("\n", 1)
     title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
     content = lines[1] if len(lines) > 1 else result
+<<<<<<< HEAD
+    return {"chapter_title": title, "chapter_content": content}
+=======
     return {"chapter_title": title, "chapter_content": content}
 ```
 
 This implementation follows the instructions in HEARTBEAT.md to create an endpoint for generating book chapters. The endpoint accepts a topic, style, target length, and language, then uses these parameters to generate a complete book chapter. The implementation includes error handling for when no AI providers are configured.
+>>>>>>> 7663ac56e3e488fa833b5d26a207e0ee1402f6d7
