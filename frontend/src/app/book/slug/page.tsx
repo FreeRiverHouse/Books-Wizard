@@ -1,18 +1,9 @@
-<<<<<<< HEAD
-// Placeholder for the book page component
-export default function BookPage() {
-  return (
-    <div>
-      <h1>Book Page</h1>
-    </div>
-  );
-}
-=======
-// page.tsx
-import React, { useState } from 'react';
-import { Button, Modal, Form, Alert } from 'react-bootstrap';
+'use client';
 
-const ChapterGenerator = () => {
+import React, { useState, useEffect } from 'react';
+import { Button, Modal, Form, Alert, Card, ListGroup } from 'react-bootstrap';
+
+export default function BookPage({ bookData }) {
   const [showModal, setShowModal] = useState(false);
   const [chapterContent, setChapterContent] = useState('');
   const [chapterTitle, setChapterTitle] = useState('');
@@ -22,9 +13,26 @@ const ChapterGenerator = () => {
   const [language, setLanguage] = useState('en');
   const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState('');
+  const [chapters, setChapters] = useState([]);
+  const [slug, setSlug] = useState('');
+
+  // Initialize with book data
+  useEffect(() => {
+    if (bookData) {
+      setChapters(bookData.chapters || []);
+      setSlug(bookData.slug || '');
+      // Autodeduce language from metadata if available
+      if (bookData.metadata?.language) {
+        setLanguage(bookData.metadata.language);
+      }
+    }
+  }, [bookData]);
 
   const handleGenerateChapter = async (e) => {
     e.preventDefault();
+    
+    // Reset error state
+    setError('');
     
     // Call the API endpoint
     try {
@@ -36,7 +44,7 @@ const ChapterGenerator = () => {
         body: JSON.stringify({
           topic,
           style,
-          target_length: targetLength,
+          target_length: parseInt(targetLength),
           language
         }),
       });
@@ -52,11 +60,40 @@ const ChapterGenerator = () => {
       setShowPreview(true);
     } catch (err) {
       console.error('Error generating chapter:', err);
+      setError('Failed to generate chapter: ' + err.message);
     }
   };
 
-  const saveChapter = () => {
+  const saveChapter = async () => {
     // Implementation to save chapter
+    try {
+      const response = await fetch(`/api/books/${slug}/chapters`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: chapterTitle,
+          content: chapterContent
+        }),
+      });
+      
+      if (response.ok) {
+        // Add to chapters list
+        setChapters([...chapters, {
+          id: chapters.length + 1,
+          title: chapterTitle,
+          slug: chapterTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        }]);
+        setShowPreview(false);
+        setShowModal(false);
+      } else {
+        setError('Failed to save chapter');
+      }
+    } catch (err) {
+      console.error('Error saving chapter:', err);
+      setError('Failed to save chapter: ' + err.message);
+    }
   };
 
   const discardChapter = () => {
@@ -65,8 +102,12 @@ const ChapterGenerator = () => {
   };
 
   return (
-    <div>
-      <Button onClick={() => setShowModal(true)}>🪄 Generate Chapter</Button>
+    <div className="book-page">
+      <div className="header">
+        <h1>{bookData?.title || 'Book'}</h1>
+        <Button onClick={() => setShowModal(true)}>🪄 Generate Chapter</Button>
+      </div>
+      
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Generate Chapter</Modal.Title>
@@ -80,6 +121,7 @@ const ChapterGenerator = () => {
                 rows={3}
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group>
@@ -121,20 +163,28 @@ const ChapterGenerator = () => {
         </Modal.Body>
       </Modal>
 
-      <Modal show={showPreview} onHide={discardChapter}>
+      <Modal size="lg" show={showPreview} onHide={discardChapter}>
         <Modal.Header closeButton>
           <Modal.Title>Chapter Preview</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <h2>{chapterTitle}</h2>
-          <div>{chapterContent}</div>
+          <div dangerouslySetInnerHTML={{ __html: chapterContent }} />
           <Button onClick={saveChapter}>Save as new chapter</Button>
           <Button variant="secondary" onClick={discardChapter}>Discard</Button>
         </Modal.Body>
       </Modal>
+      
+      <Card>
+        <Card.Header>Chapters</Card.Header>
+        <ListGroup variant="flush">
+          {chapters.map((chapter) => (
+            <ListGroup.Item key={chapter.id}>
+              <a href={`#${chapter.slug}`}>{chapter.title}</a>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </Card>
     </div>
   );
-};
-
-export default ChapterGenerator;
->>>>>>> 7663ac56e3e488fa833b5d26a207e0ee1402f6d7
+}
