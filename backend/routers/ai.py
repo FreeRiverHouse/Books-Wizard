@@ -67,6 +67,30 @@ async def ai_write_chapter(req: WriteChapterRequest):
         f"Use [^N] footnote markers for technical/foreign terms. "
         f"Return markdown starting with one '# Title' line."
     )
+    try:
+        result = await call_ai_cascade(prompt, max_tokens=req.target_length * 4)
+    except NoProvidersError:
+        raise HTTPException(503, "No AI providers configured")
+    lines = result.split("\n", 1)
+    title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
+    content = lines[1] if len(lines) > 1 else result
+    return {"chapter_title": title, "chapter_content": content}
+
+class WriteChapterRequest(BaseModel):
+    topic: str
+    style: str = "narrative"
+    target_length: int = 800
+    language: str = "en"
+
+@router.post("/api/ai/write-chapter")
+async def ai_write_chapter(req: WriteChapterRequest):
+    prompt = (
+        f"Write a complete book chapter on '{req.topic}'. "
+        f"Style: {req.style}. Target length: ~{req.target_length} words. "
+        f"Language: {req.language}. "
+        f"Use [^N] footnote markers for technical/foreign terms. "
+        f"Return markdown starting with one '# Title' line."
+    )
     providers = _get_providers()
     if not providers:
         raise HTTPException(status_code=503, detail="No AI providers configured. Add API keys in Settings.")
