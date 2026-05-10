@@ -122,11 +122,11 @@ async def ai_write_chapter(req: WriteChapterRequest):
         f"Use [^N] footnote markers for technical/foreign terms. "
         f"Return markdown starting with one '# Title' line."
     )
-try:
-    result = await call_ai_cascade(prompt, max_tokens=req.target_length * 4)
-except NoProvidersError:
-    raise HTTPException(503, "No AI providers configured")
-lines = result.split("\n", 1)
-title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
-content = lines[1] if len(lines) > 1 else result
-return {"chapter_title": title, "chapter_content": content}
+    try:
+        result = await call_ai_cascade(prompt, max_tokens=req.target_length * 4)
+    except NoProvidersError:
+        raise HTTPException(503, "No AI providers configured")
+    lines = result.split("\n", 1)
+    title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
+    content = lines[1] if len(lines) > 1 else result
+    return {"chapter_title": title, "chapter_content": content}
