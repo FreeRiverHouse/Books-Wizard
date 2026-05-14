@@ -67,26 +67,45 @@ export default function BookPage({ bookData }) {
   const saveChapter = async () => {
     // Implementation to save chapter
     try {
-      const response = await fetch(`/api/books/${slug}/chapters`, {
-        method: 'POST',
+      // Generate a slug for the chapter
+      const chapterSlug = chapterTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'chapter-' + (chapters.length + 1);
+      
+      // Save the chapter content
+      const response = await fetch(`/api/books/${slug}/chapters/${chapterSlug}.txt`, {
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({
-          title: chapterTitle,
-          content: chapterContent
-        }),
+        body: chapterContent,
       });
       
       if (response.ok) {
-        // Add to chapters list
-        setChapters([...chapters, {
-          id: chapters.length + 1,
-          title: chapterTitle,
-          slug: chapterTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-        }]);
-        setShowPreview(false);
-        setShowModal(false);
+        // Update metadata.json with the new chapter
+        const metadataResponse = await fetch(`/api/books/${slug}/metadata`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'addChapter',
+            chapter: {
+              title: chapterTitle,
+              slug: chapterSlug
+            }
+          }),
+        });
+        
+        if (metadataResponse.ok) {
+          // Add to chapters list
+          setChapters([...chapters, {
+            title: chapterTitle,
+            slug: chapterSlug
+          }]);
+          setShowPreview(false);
+          setShowModal(false);
+        } else {
+          setError('Failed to update book metadata');
+        }
       } else {
         setError('Failed to save chapter');
       }
@@ -105,8 +124,9 @@ export default function BookPage({ bookData }) {
     <div className="book-page">
       <div className="header">
         <h1>{bookData?.title || 'Book'}</h1>
-        <Button onClick={() => setShowModal(true)}>🪄 Generate Chapter</Button>
       </div>
+      
+      <Button onClick={() => setShowModal(true)}>🪄 Generate Chapter</Button>
       
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -150,6 +170,44 @@ export default function BookPage({ bookData }) {
               <Form.Label>Language</Form.Label>
               <Form.Control 
                 type="text"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                placeholder="e.g., en, es, fr"
+              />
+            </Form.Group>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Button variant="primary" type="submit">
+              Generate Chapter
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      <Modal size="lg" show={showPreview} onHide={discardChapter}>
+        <Modal.Header closeButton>
+          <Modal.Title>Chapter Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h2>{chapterTitle}</h2>
+          <div dangerouslySetInnerHTML={{ __html: chapterContent }} />
+          <Button onClick={saveChapter}>Save as new chapter</Button>
+          <Button variant="secondary" onClick={discardChapter}>Discard</Button>
+        </Modal.Body>
+      </Modal>
+      
+      <Card>
+        <Card.Header>Chapters</Card.Header>
+        <ListGroup variant="flush">
+          {chapters.map((chapter, index) => (
+            <ListGroup.Item key={index}>
+              <a href={`#${chapter.slug}`}>{chapter.title}</a>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </Card>
+    </div>
+  );
+}
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 placeholder="e.g., en, es, fr"
