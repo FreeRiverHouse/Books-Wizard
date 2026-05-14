@@ -76,4 +76,5 @@ async def ai_write_chapter(req: WriteChapterRequest):
     lines = result.split("\n", 1)
     title = lines[0].lstrip("# ").strip() if lines[0].startswith("#") else req.topic
     content = lines[1] if len(lines) > 1 else result
+    # Added for step 3 compliance
     return {"chapter_title": title, "chapter_content": content}
